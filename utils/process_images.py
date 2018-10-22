@@ -40,7 +40,7 @@ flags = tf.app.flags
 flags.DEFINE_string('model_dir', '/tmp/imagenet', 'The location of downloaded imagenet model')
 flags.DEFINE_string('image_files', '', 'A glob path of images to process')
 flags.DEFINE_integer('clusters', 20, 'The number of clusters to display in the image browser')
-flags.DEFINE_boolean('validate_images', True, 'Whether to validate images before processing')
+flags.DEFINE_boolean('validate_images', False, 'Whether to validate images before processing')
 flags.DEFINE_string('output_folder', 'output', 'The folder where output files will be stored')
 flags.DEFINE_string('layout', 'umap', 'The layout method to use {umap|tsne}')
 FLAGS = flags.FLAGS
@@ -54,7 +54,7 @@ class PixPlot:
 
     self.image_files = image_glob
     self.output_dir = FLAGS.output_folder
-    self.sizes = [16, 32, 64, 128]
+    self.sizes = [16, 32, 64, 128, 256, 512]
     self.n_clusters = FLAGS.clusters
     self.errored_images = set()
     self.vector_files = []
@@ -119,7 +119,7 @@ class PixPlot:
 
   def create_image_thumbs(self):
     '''
-    Create output thumbs in 32px, 64px, and 128px
+    Create output thumbs in 32px, 64px, and 128px, 256p, and 512px
     '''
     print(' * creating image thumbs')
     resize_args = []
@@ -231,13 +231,17 @@ class PixPlot:
     '''
     print(' * building 2D projection')
     if self.method == 'tsne':
-      model = TSNE(n_components=2, random_state=0)
+      model = TSNE(n_components=2, random_state=0, learning_rate=400, metric='correlation', init='pca')
       np.set_printoptions(suppress=True)
       return model.fit_transform( np.array(image_vectors) )
 
     elif self.method == 'umap':
       model = UMAP(n_neighbors=25, min_dist=0.00001, metric='correlation')
-      return model.fit_transform( np.array(image_vectors) )
+      # PMB
+      #return model.fit_transform( np.array(image_vectors) )
+      vector_array = np.array(image_vectors)
+      model_fit = model.fit_transform(vector_array)
+      return model_fit
 
 
   def get_image_positions(self, fit_model):
@@ -250,7 +254,7 @@ class PixPlot:
       img = get_filename(self.vector_files[c])
       if img in self.errored_images:
         continue
-      thumb_path = join(self.output_dir, 'thumbs', '32px', img)
+      thumb_path = join(self.output_dir, 'thumbs', '64px', img.replace('.png', '.jpg'))
       with Image.open(thumb_path) as image:
         width, height = image.size
       # Add the image name, x offset, y offset
@@ -280,7 +284,7 @@ class PixPlot:
     centroid_json = []
     for c, i in enumerate(centroid_paths):
       centroid_json.append({
-        'img': get_filename(i),
+        'img': get_filename(i).replace('.png', '.jpg'),
         'label': 'Cluster ' + str(c+1)
       })
     return centroid_json
@@ -305,7 +309,10 @@ class PixPlot:
     file_count = len(self.vector_files)
     return {
       '32px': ceil( file_count / (64**2) ),
-      '64px': ceil( file_count / (32**2) )
+      '64px': ceil( file_count / (32**2) ),
+      '128px': ceil( file_count / (16**2) ),
+      '256px': ceil( file_count / (8**2) ),
+      '512px': ceil( file_count / (4**2) )
     }
 
 
