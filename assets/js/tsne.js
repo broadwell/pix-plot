@@ -8,7 +8,7 @@ function Config() {
     spread: { // scale for positioning items on x,y axes
       x: 4000,
       y: 4000,
-      z: 1,
+      z: 2000,
     },
   };
   this.size = {
@@ -20,6 +20,7 @@ function Config() {
   }
   this.lod = {
     minZ: 250,
+    //minZ: -500,
     radius: 2,
     framesBetweenUpdates: 40,
     gridSpacing: 0.01,
@@ -292,9 +293,14 @@ Cell.prototype.getLayouts = function() {
   layout.options.forEach(function(i, idx) {
     if (i != 'grid') { //skip grid key as it doesn't come from server
       var pos = positions[idx];
+      /*zIndex = 1;
+      if (pos.length == 3) {
+        zIndex = pos[2] * 5000;
+      }*/
       options[i] = {
         x: pos[0] * config.data.spread.x,
         y: pos[1] * config.data.spread.y,
+        //z: zIndex
         z: pos.length > 2 ? (pos[2] + Math.random()) * config.data.spread.z : this.idx % 50,
       }
     };
