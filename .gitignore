@@ -1,5 +1,6 @@
-data/
-output/
-.DS_Store
+__pycache__
 *.pem
 *.swp
+*.DS_Store
+data
+output

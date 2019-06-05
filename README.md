@@ -4,6 +4,7 @@ This repository contains code that can be used to visualize tens of thousands of
 
 ![App preview](./assets/images/preview.png?raw=true)
 
+
 ## Dependencies
 
 To install the Python dependencies, you can run (ideally in a virtual environment):
@@ -20,7 +21,8 @@ Image resizing utilities require ImageMagick compiled with jpg support:
 brew uninstall imagemagick && brew install imagemagick
 ```
 
-The html viewer requires a WebGL-enabled browser.
+The HTML viewer requires a WebGL-enabled browser.
+
 
 ## Quickstart
 
@@ -79,8 +81,25 @@ By default, PixPlot uses [*k*-means clustering](https://en.wikipedia.org/wiki/K-
 
 After processing, you can curate the discovered hotspots by editing the resulting `output/plot_data.json` file. (This file can be unwieldy in large datasets -- you may wish to disable syntax highlighting and automatic wordwrap in your text editor.) The hotspots will be listed at the very end of the JSON data, each containing a label (by default 'Cluster *N*') and the name of an image that represents the centroid of the discovered hotspot.
 
-You can add, remove or re-order these, change the labels to make them more meaningful, and/or adjust the image that symbolizes each hotspot in the left-hand **Hotspots** menu.  *Hint: to get the name of an image that you feel better reflects the cluster, click on it in the visualization and it will appear suffixed to the URL.*
+## Adding Metadata
 
+If you have metadata associated with each of your images, you can pass in that metadata when running the data processing script. Doing so will allow the PixPlot viewer to display the metadata associated with an image when a user clicks on that image.
+
+Your metadata should be in a comma-separated value file (CSV), should contain one row for each of your input images, and should contain exactly the following columns in the following order.
+
+| Filename | Metadata Tags | Description | Permalink   |
+| -------- | ------------- | ----------- | ----------- |
+| bees.jpg | honey|yellow  | bees' knees | https://... |
+
+The CSV should contain no headers.
+
+## Overlapping Points
+
+For both performance and aesthetic reasons, it can make sense to minimize the degree to which images overlap in the z-dimension (depth into the scene). To separate overlapping points, one can supply a `lloyd_iterations` argument to the command line utility, either while creating a pixplot or thereafter. For example, one can run:
+
+```
+python utils/process_images.py --image_files="data/*.jpg" --lloyd_iterations=20
+```
 
 ## Demonstrations
 
@@ -92,4 +111,4 @@ You can add, remove or re-order these, change the labels to make them more meani
 
 ## Acknowledgements
 
-The DHLab would like to thank [Cyril Diagne](http://cyrildiagne.com/), a lead developer on the spectacular [Google Arts Experiments TSNE viewer](https://artsexperiments.withgoogle.com/tsnemap/), for generously sharing ideas on optimization techniques used in this viewer.
+The DHLab would like to thank [Cyril Diagne](http://cyrildiagne.com/) and [Nicolas Barradeau](http://barradeau.com), lead developers of the spectacular [Google Arts Experiments TSNE viewer](https://artsexperiments.withgoogle.com/tsnemap/), for generously sharing ideas on optimization techniques used in this viewer, and [Lillianna Marie](https://github.com/lilliannamarie) for naming this viewer PixPlot.
